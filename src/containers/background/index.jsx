@@ -6,7 +6,7 @@ import "./back.scss";
 
 export { Background } from "./Background";
 export { BootScreen } from "./Background";
-export { LockScreen } from "./LockScreen"; // if LockScreen is in a separate file
+
 
 
 export const LockScreen = (props) => {
