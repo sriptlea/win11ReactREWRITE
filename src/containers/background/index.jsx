@@ -4,7 +4,7 @@ import Battery from "../../components/shared/Battery";
 import { Icon, Image } from "../../utils/general";
 import "./back.scss";
 
-export { Background, BootScreen, LockScreen };
+import { Background, BootScreen, LockScreen } from "./containers/background/Background";
 
 
 export const LockScreen = (props) => {
