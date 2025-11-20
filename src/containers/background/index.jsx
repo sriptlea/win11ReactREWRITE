@@ -135,7 +135,7 @@ export const LockScreen = (props) => {
           <input
             type={passType ? "text" : "password"}
             value={password}
-            onChange={action}
+            onChange={handleInputChange}
             data-action="inpass"
             onKeyDown={action2}
             placeholder={passType ? "Password" : "PIN"}
