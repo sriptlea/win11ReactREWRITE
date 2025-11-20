@@ -17,9 +17,10 @@ const defState = {
     },
   },
   person: {
-    name: "Blue Edge",
+    name: "User",
     theme: "light",
     color: "blue",
+    pin: "3333", 
   },
   devices: {
     bluetooth: false,
@@ -75,6 +76,11 @@ const settReducer = (state = defState, action) => {
       changed = true;
       tmpState = { ...action.payload };
       break;
+
+    case "SET_PIN":
+     changed = true;
+     tmpState.person.pin = action.payload;
+     break;
     case "TOGGAIRPLNMD":
       changed = true;
       const airPlaneModeStatus = tmpState.network.airplane;
