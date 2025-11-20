@@ -3,6 +3,65 @@
   z-index: 0;
 }
 
+/* --- Windows 11 PIN Input UI --- */
+
+.pinBox {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.pinInput {
+  width: 180px;
+  padding: 10px 14px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  color: white;
+  outline: none;
+  text-align: center;
+  transition: 0.25s ease;
+}
+
+.pinInput::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pinInput:focus {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.arrowIcon {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.arrowIcon:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Incorrect PIN shake */
+.shake {
+  animation: shakeAnim 0.3s ease;
+}
+
+@keyframes shakeAnim {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+
 .background {
   min-width: 100vw;
   min-height: 100vh;
