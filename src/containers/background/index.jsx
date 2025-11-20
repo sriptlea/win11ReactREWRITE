@@ -4,49 +4,98 @@ import Battery from "../../components/shared/Battery";
 import { Icon, Image } from "../../utils/general";
 import "./back.scss";
 
-export { Background } from "./Background";
-export { BootScreen } from "./Background";
+export const Background = () => {
+  const wall = useSelector((state) => state.wallpaper);
+  return (
+    <div
+      className="background"
+      style={{
+        backgroundImage: `url(img/wallpaper/${wall.src})`,
+      }}
+    ></div>
+  );
+};
 
+export const BootScreen = (props) => {
+  const dispatch = useDispatch();
+  const wall = useSelector((state) => state.wallpaper);
+  const [blackout, setBlackOut] = useState(false);
 
+  useEffect(() => {
+    if (props.dir < 0) {
+      setTimeout(() => setBlackOut(true), 4000);
+    }
+  }, [props.dir]);
+
+  useEffect(() => {
+    if (props.dir < 0 && blackout && wall.act === "restart") {
+      setTimeout(() => {
+        setBlackOut(false);
+        setTimeout(() => dispatch({ type: "WALLBOOTED" }), 4000);
+      }, 2000);
+    }
+  }, [blackout]);
+
+  return (
+    <div className="bootscreen">
+      <div className={blackout ? "hidden" : ""}>
+        <Image src="asset/bootlogo" w={180} />
+        <div className="mt-48" id="loader">
+          <svg className="progressRing" height={48} width={48} viewBox="0 0 16 16">
+            <circle cx="8px" cy="8px" r="7px"></circle>
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const LockScreen = (props) => {
+  const wall = useSelector((state) => state.wallpaper);
   const dispatch = useDispatch();
 
   const [lock, setLock] = useState(false);
   const [unlocked, setUnLock] = useState(false);
-  const [pin, setPin] = useState("");
+  const [password, setPass] = useState("");
+  const [passType, setType] = useState(1); // 1 = password, 0 = pin
   const [forgot, setForget] = useState(false);
-  const [error, setError] = useState(false);
 
   const userName = useSelector((state) => state.setting.person.name);
   const savedPIN = useSelector((state) => state.setting.person.pin);
 
-  // handle clicks using data-action
   const action = (e) => {
     const act = e.target.dataset.action;
 
     if (act === "splash") setLock(true);
+
+    if (act === "inpass") {
+      let val = e.target.value;
+      if (passType === 0) val = val.slice(0, 4); // PIN always 4 digits max
+      setPass(val);
+    }
+
     if (act === "forgot") setForget(true);
-    if (act === "input") {
-      let val = e.target.value.slice(0, 4); // max 4 digits
-      setPin(val);
+    if (act === "pinlock") {
+      setType(0);
+      setPass("");
+    }
+    if (act === "passkey") {
+      setType(1);
+      setPass("");
     }
   };
 
   const proceed = () => {
-    if (pin !== savedPIN) {
-      // ❌ Wrong PIN → shake effect
-      setError(true);
-      setTimeout(() => setError(false), 500);
+    if (passType === 0 && password !== savedPIN) {
+      alert("Incorrect PIN");
       return;
     }
 
-    // ✔ Correct PIN → unlock animation
     setUnLock(true);
     setTimeout(() => dispatch({ type: "WALLUNLOCK" }), 1000);
   };
 
-  const keyEnter = (e) => (e.key === "Enter" ? proceed() : null);
+  const action2 = (e) => e.key === "Enter" && proceed();
 
   return (
     <div
@@ -57,12 +106,12 @@ export const LockScreen = (props) => {
       data-action="splash"
       data-blur={lock}
     >
-      {/* Splash Clock */}
       <div className="splashScreen mt-40" data-faded={lock}>
         <div className="text-6xl font-semibold text-gray-100">
           {new Date().toLocaleTimeString("en-US", {
             hour: "numeric",
             minute: "numeric",
+            hour12: true,
           })}
         </div>
         <div className="text-lg font-medium text-gray-200">
@@ -74,51 +123,60 @@ export const LockScreen = (props) => {
         </div>
       </div>
 
-      {/* Unlock Panel */}
       <div className="fadeinScreen" data-faded={!lock} data-unlock={unlocked}>
-        <Image
-          className="rounded-full overflow-hidden"
-          src="img/asset/prof.jpg"
-          w={170}
-          ext
-        />
+        <Image className="rounded-full overflow-hidden" src="img/asset/prof.jpg" w={200} ext />
+        <div className="mt-2 text-2xl font-medium text-gray-200">{userName}</div>
 
-        <div className="mt-4 text-2xl font-medium text-gray-200">
-          {userName}
+        <div className="flex items-center mt-6 signInBtn" onClick={proceed}>
+          Sign in
         </div>
 
-        {/* PIN Input */}
-        <div className={`pinBox ${error ? "shake" : ""}`}>
+        <div className="flex items-center mt-4">
           <input
-            type="password"
-            className="pinInput"
-            placeholder="Enter PIN"
-            maxLength={4}
-            value={pin}
-            data-action="input"
+            type={passType ? "text" : "password"}
+            value={password}
             onChange={action}
-            onKeyDown={keyEnter}
+            data-action="inpass"
+            onKeyDown={action2}
+            placeholder={passType ? "Password" : "PIN"}
           />
           <Icon
-            className="arrowIcon"
+            className="-ml-6 handcr"
             fafa="faArrowRight"
-            width={16}
-            color="rgba(200, 200, 200, 0.7)"
+            width={14}
+            color="rgba(170, 170, 170, 0.6)"
             onClick={proceed}
           />
         </div>
 
-        {/* Forgot PIN */}
         <div
           className="text-xs text-gray-400 mt-4 handcr"
           data-action="forgot"
           onClick={action}
         >
-          {!forgot ? "I forgot my PIN" : "Not my problem"}
+          {!forgot ? `I forgot my ${passType ? "password" : "pin"}` : "Not my problem"}
+        </div>
+
+        <div className="text-xs text-gray-400 mt-6">Sign-in options</div>
+
+        <div className="lockOpt flex">
+          <Icon
+            src="pinlock"
+            ui
+            width={36}
+            data-action="pinlock"
+            onClick={action}
+          />
+          <Icon
+            src="passkey"
+            ui
+            width={36}
+            data-action="passkey"
+            onClick={action}
+          />
         </div>
       </div>
 
-      {/* Bottom system info */}
       <div className="bottomInfo flex">
         <Icon className="mx-2" src="wifi" ui width={16} invert />
         <Battery invert />
